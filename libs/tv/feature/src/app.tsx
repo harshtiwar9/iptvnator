@@ -21,6 +21,7 @@ import { useSeriesDetails } from './use-series-details';
 import { mediaTitle } from '@iptvnator/tv/util';
 import { PersonPage } from './person-page';
 import type { FilmographyMemory } from './use-filmography-search';
+import { RemoteKeyDiagnostic } from './remote-key-diagnostic';
 const navigation: [View, string][] = [
     ['home', 'Home'],
     ['live', 'TV'],
@@ -110,6 +111,7 @@ export function TvApp() {
                     button.focus({ preventScroll: true });
             }}
         >
+            <RemoteKeyDiagnostic />
             {!tv.storageReady ? (
                 <section
                     class="source-form storage-recovery"

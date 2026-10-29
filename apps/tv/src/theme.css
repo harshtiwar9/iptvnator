@@ -1458,3 +1458,52 @@ main.live-page {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+.remote-key-diagnostic {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1000;
+    width: 820px;
+    max-height: 520px;
+    overflow: auto;
+    padding: 14px;
+    border: 2px solid var(--tv-accent);
+    border-radius: 8px;
+    background: rgba(11, 16, 15, 0.96);
+    font-family: monospace;
+    font-size: 14px;
+}
+.remote-key-diagnostic header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.remote-key-diagnostic header strong {
+    flex: 1;
+    color: var(--tv-accent);
+}
+.remote-key-diagnostic header button {
+    min-height: 44px;
+    padding: 8px 12px;
+}
+.remote-key-diagnostic-status {
+    margin: 8px 0;
+    color: var(--tv-muted);
+}
+.remote-key-diagnostic ol {
+    margin: 0;
+    padding-left: 24px;
+    max-height: 250px;
+    overflow: auto;
+}
+.remote-key-diagnostic li {
+    margin: 2px 0;
+    white-space: nowrap;
+}
+.remote-key-diagnostic textarea {
+    width: 100%;
+    height: 72px;
+    margin-top: 8px;
+    font-family: monospace;
+    font-size: 12px;
+}
