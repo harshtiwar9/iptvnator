@@ -304,7 +304,7 @@
             ) {
                 <app-channel-list-item
                     [attr.data-channel-id]="normalizeStalkerEntityId(item.id)"
-                    [name]="item.o_name || item.name || ''"
+                    [name]="channelName(item)"
                     [logo]="item.logo"
                     [selected]="isSelectedChannel(item)"
                     [epgProgram]="

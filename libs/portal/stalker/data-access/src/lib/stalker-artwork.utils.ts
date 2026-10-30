@@ -33,7 +33,7 @@ export function resolveStalkerArtwork(
         if (
             typeof value !== 'string' ||
             !value.trim() ||
-            /^(n\/a|null|undefined)$/i.test(value.trim())
+            /^(n\/a|null|undefined|-)$/i.test(value.trim())
         )
             continue;
         try {

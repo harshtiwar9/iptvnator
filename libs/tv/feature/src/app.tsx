@@ -22,6 +22,7 @@ import { mediaTitle } from '@iptvnator/tv/util';
 import { PersonPage } from './person-page';
 import type { FilmographyMemory } from './use-filmography-search';
 import { RemoteKeyDiagnostic } from './remote-key-diagnostic';
+import { useLiveChannelSwitch } from './use-live-channel-switch';
 const navigation: [View, string][] = [
     ['home', 'Home'],
     ['live', 'TV'],
@@ -46,6 +47,7 @@ export function TvApp() {
     useSeriesContext(tv);
     const browse = useLiveBrowse(tv);
     const overlay = useLiveOverlay(tv, browse);
+    useLiveChannelSwitch(tv, !!overlay.panel);
     useEffect(() => {
         const position = () => {
             const rect = document

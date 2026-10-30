@@ -14,7 +14,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { applyChannelNameStrip } from '@iptvnator/shared/m3u-utils';
-import { readProviderRating } from '@iptvnator/shared/interfaces';
+import {
+    firstProviderText,
+    readProviderRating,
+} from '@iptvnator/shared/interfaces';
 import {
     PortalWatchState,
     getXtreamCatchupDays,
@@ -343,7 +346,9 @@ export class GridListComponent {
             : 'CHANNELS.CATCHUP_AVAILABLE';
     }
     protected readonly channelTitle = (item: GridListItem): string => {
-        const raw = item.title ?? item.o_name ?? item.name ?? '';
+        const raw = this.isLiveGrid()
+            ? (firstProviderText(item.o_name, item.name, item.title) ?? '')
+            : (item.title ?? item.o_name ?? item.name ?? '');
         const stripped = applyChannelNameStrip(
             raw,
             this.isLiveGrid() && this.settingsStore.stripCountryPrefix?.()

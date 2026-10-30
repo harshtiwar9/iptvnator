@@ -8,6 +8,7 @@ import {
 import {
     isStalkerSeriesItem,
     isStalkerStreamCredentialSafe,
+    firstProviderText,
 } from '@iptvnator/shared/interfaces';
 import {
     Catalog,
@@ -65,15 +66,22 @@ export class StalkerProvider implements ProviderClient {
             providerId: text(id),
             kind: actualKind,
             title:
-                [raw.o_name, raw.name, raw.title]
-                    .map(text)
-                    .find((value) => value.trim()) ?? '',
+                firstProviderText(raw.o_name, raw.name, raw.title) ?? '',
             poster: resolveStalkerArtwork(
                 this.source.endpoint ?? this.source.url,
-                raw.cover,
-                raw.screenshot_uri,
-                raw.logo,
-                raw.poster_url
+                ...(kind === 'live'
+                    ? [
+                          raw.logo,
+                          raw.screenshot_uri,
+                          raw.cover,
+                          raw.poster_url,
+                      ]
+                    : [
+                          raw.cover,
+                          raw.screenshot_uri,
+                          raw.logo,
+                          raw.poster_url,
+                      ])
             ),
             description: text(raw.description),
             year: text(raw.year),

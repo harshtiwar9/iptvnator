@@ -62,6 +62,7 @@ import {
     shortEpgWindowSize,
     StalkerPortalItem,
     toRecordingProgramSnapshot,
+    firstProviderText,
 } from '@iptvnator/shared/interfaces';
 import {
     EpgDateNavigationDirection,
@@ -208,6 +209,10 @@ export class StalkerLiveStreamLayoutComponent
     );
     private readonly logger = createLogger('StalkerLiveStream');
     private readonly languageTick = injectTranslationTick();
+    readonly channelName = (
+        channel: StalkerItvChannel
+    ): string =>
+        firstProviderText(channel.o_name, channel.name, channel.title) ?? '';
     /**
      * The portal's genre name, or the store's every-item entry translated
      * in the current language: the tick re-runs this after a switch.

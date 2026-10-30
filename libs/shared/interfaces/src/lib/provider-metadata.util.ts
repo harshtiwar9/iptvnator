@@ -13,7 +13,11 @@
  * Keep the list to stand-ins providers were actually seen sending: every
  * entry also erases a genuine value that happens to read the same.
  */
-const PROVIDER_PLACEHOLDERS: ReadonlySet<string> = new Set(['n/a', '-']);
+const PROVIDER_PLACEHOLDERS: ReadonlySet<string> = new Set([
+    'n/a',
+    '-',
+    'live channel',
+]);
 
 /**
  * Trimmed provider text, or `undefined` when it is blank or a placeholder.

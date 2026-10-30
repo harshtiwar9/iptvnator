@@ -1,11 +1,12 @@
 import { firstNonBlankStalkerId } from '../../stalker-vod.utils';
+import { firstProviderText } from '@iptvnator/shared/interfaces';
 import {
     StalkerContentItem,
     StalkerItvChannel,
     StalkerVodSource,
 } from '../../models';
 
-import { makeAbsoluteUrl } from '../../stalker-artwork.utils';
+import { resolveStalkerArtwork } from '../../stalker-artwork.utils';
 export { makeAbsoluteUrl } from '../../stalker-artwork.utils';
 
 /**
@@ -17,12 +18,21 @@ export function processItemUrls<T extends StalkerVodSource>(
 ): T {
     const processed = { ...item };
 
-    // Convert screenshot_uri to absolute URL
-    if (processed.screenshot_uri) {
-        processed.screenshot_uri = makeAbsoluteUrl(
-            portalUrl,
-            processed.screenshot_uri
-        );
+    for (const field of [
+        'cover',
+        'screenshot_uri',
+        'logo',
+        'poster_url',
+    ] as const) {
+        const value = processed[field as keyof StalkerVodSource];
+        if (typeof value === 'string' && value.trim()) {
+            const normalized = resolveStalkerArtwork(portalUrl, value);
+            if (normalized) {
+                (processed as Record<string, unknown>)[field] = normalized;
+            } else {
+                delete (processed as Record<string, unknown>)[field];
+            }
+        }
     }
 
     return processed;
@@ -35,7 +45,7 @@ export function toStalkerContentItem(
     const processed = processItemUrls(item, portalUrl);
     return {
         ...processed,
-        cover: processed.screenshot_uri,
+        cover: processed.screenshot_uri ?? processed.cover,
     };
 }
 
@@ -60,6 +70,12 @@ export function filterItvChannelsByGenre(
 export function toStalkerItvChannel(
     item: StalkerContentItem
 ): StalkerItvChannel {
+    const logo = firstProviderText(
+        item.logo,
+        item.screenshot_uri,
+        item.cover,
+        item.poster_url
+    );
     return {
         ...item,
         // First NON-BLANK id: a blank `id` beside a valid `stream_id` must
@@ -68,6 +84,6 @@ export function toStalkerItvChannel(
         cmd: String(item.cmd ?? ''),
         name: typeof item.name === 'string' ? item.name : undefined,
         o_name: typeof item.o_name === 'string' ? item.o_name : undefined,
-        logo: typeof item.logo === 'string' ? item.logo : undefined,
+        logo,
     };
 }

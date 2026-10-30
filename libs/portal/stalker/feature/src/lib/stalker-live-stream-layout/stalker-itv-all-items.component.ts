@@ -130,7 +130,11 @@ export class StalkerItvAllItemsComponent {
                 return {
                     ...rest,
                     ...(is_series == null ? {} : { is_series }),
-                    stream_icon: channel.logo,
+                    stream_icon:
+                        channel.logo ??
+                        channel.screenshot_uri ??
+                        channel.cover ??
+                        channel.poster_url,
                 };
             })
     );

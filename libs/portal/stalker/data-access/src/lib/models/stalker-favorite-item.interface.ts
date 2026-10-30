@@ -31,6 +31,7 @@ export interface StalkerVodSource {
     cover?: string;
     logo?: string;
     screenshot_uri?: string;
+    poster_url?: string;
     name?: string;
     o_name?: string;
     description?: string;

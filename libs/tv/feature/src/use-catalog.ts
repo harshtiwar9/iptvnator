@@ -7,6 +7,25 @@ import {
 } from '@iptvnator/tv/util';
 import { Route } from './navigation';
 const empty = (): Catalog => ({ items: [], total: 0, page: 0, categories: [] });
+export function coalesceLivePageRequest(
+    cache: Map<string, Promise<Catalog | undefined>>,
+    key: string,
+    request: () => Promise<Catalog | undefined>
+): Promise<Catalog | undefined> {
+    const existing = cache.get(key);
+    if (existing) return existing;
+    const promise = request();
+    cache.set(key, promise);
+    void promise.then(
+        () => {
+            if (cache.get(key) === promise) cache.delete(key);
+        },
+        () => {
+            if (cache.get(key) === promise) cache.delete(key);
+        }
+    );
+    return promise;
+}
 /** One active query survives detail navigation; a new query cancels its append lane. */
 export function useCatalog(
     route: Route,
@@ -37,10 +56,16 @@ export function useCatalog(
     const snapshot = useRef(state);
     snapshot.current = state;
     const request = useRef(false);
+    const navigation = useRef({
+        generation: 0,
+        requests: new Map<string, Promise<Catalog | undefined>>(),
+        controllers: new Map<string, AbortController>(),
+    });
     const latest = useRef({
         key,
         route,
         provider,
+        source,
         ready,
         active,
         finishFocus,
@@ -51,6 +76,7 @@ export function useCatalog(
         key,
         route,
         provider,
+        source,
         ready,
         active,
         finishFocus,
@@ -153,12 +179,75 @@ export function useCatalog(
             request.current = false;
         };
     }, [key, active]);
+    useEffect(() => {
+        navigation.current.generation++;
+        navigation.current.requests.clear();
+        navigation.current.controllers.forEach((controller) =>
+            controller.abort()
+        );
+        navigation.current.controllers.clear();
+        return () => {
+            navigation.current.generation++;
+            navigation.current.requests.clear();
+            navigation.current.controllers.forEach((controller) =>
+                controller.abort()
+            );
+            navigation.current.controllers.clear();
+        };
+    }, [source, key, ready]);
+    function loadLivePage(
+        category: string,
+        page: number
+    ): Promise<Catalog | undefined> {
+        const current = latest.current;
+        if (
+            !current.ready ||
+            !current.provider.current ||
+            page < 0 ||
+            !Number.isInteger(page)
+        )
+            return Promise.resolve(undefined);
+        const client = current.provider.current;
+        const generation = navigation.current.generation;
+        const requestKey = JSON.stringify([source, category, page]);
+        return coalesceLivePageRequest(
+            navigation.current.requests,
+            requestKey,
+            async () => {
+                const controller = new AbortController();
+                navigation.current.controllers.set(requestKey, controller);
+                try {
+                    const result = await client.catalog(
+                        'live',
+                        category,
+                        page,
+                        '',
+                        controller.signal,
+                        'provider'
+                    );
+                    if (
+                        controller.signal.aborted ||
+                        generation !== navigation.current.generation ||
+                        client !== latest.current.provider.current ||
+                        source !== latest.current.source
+                    )
+                        return undefined;
+                    return { ...result, page };
+                } catch {
+                    return undefined;
+                } finally {
+                    navigation.current.controllers.delete(requestKey);
+                }
+            }
+        );
+    }
     return {
         catalog: state.key === key ? state.catalog : empty(),
         catalogBusy: active && state.busy,
         catalogError: state.key === key ? state.error : '',
         hasMore: state.key === key && state.more,
         loadMore: () => void load(snapshot.current.catalog.items.length > 0),
+        loadLivePage,
         catalogKey: key,
     };
 }

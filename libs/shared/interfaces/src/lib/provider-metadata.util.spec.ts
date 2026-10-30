@@ -30,6 +30,9 @@ describe('firstProviderText', () => {
     it('skips placeholders and blanks to reach the usable fallback', () => {
         expect(firstProviderText('N/A', '', '  ', '2011')).toBe('2011');
         expect(firstProviderText('-', undefined)).toBeUndefined();
+        expect(firstProviderText('Live Channel', 'Actual Channel')).toBe(
+            'Actual Channel'
+        );
     });
 });
 

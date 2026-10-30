@@ -1,6 +1,7 @@
 import { StalkerItvChannel } from '../../models';
 import {
     filterItvChannelsByGenre,
+    processItemUrls,
     toStalkerItvChannel,
 } from './stalker-content-mappers';
 
@@ -50,5 +51,22 @@ describe('toStalkerItvChannel', () => {
 
     it('falls back to an empty id when neither is set', () => {
         expect(toStalkerItvChannel({ cmd: 'x' }).id).toBe('');
+    });
+
+    it('uses the first usable Stalker artwork field and rejects invalid URLs', () => {
+        const processed = processItemUrls(
+            {
+                id: 8,
+                cmd: 'x',
+                logo: '-',
+                screenshot_uri: '/icons/channel.png',
+                poster_url: 'ftp://invalid.example/channel.png',
+            },
+            'https://portal.example/server/load.php'
+        );
+        const channel = toStalkerItvChannel(processed);
+        expect(channel.logo).toBe(
+            'https://portal.example/icons/channel.png'
+        );
     });
 });

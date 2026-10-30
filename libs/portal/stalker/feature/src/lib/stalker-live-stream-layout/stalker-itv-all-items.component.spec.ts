@@ -84,6 +84,22 @@ describe('StalkerItvAllItemsComponent', () => {
         expect('is_series' in item).toBe(false);
     });
 
+    it('uses alternate artwork fields when logo is missing', () => {
+        fixture.componentRef.setInput('channels', [
+            {
+                id: 'alternate-art',
+                cmd: 'ffrt4://itv/alternate-art',
+                name: 'Alternate Art',
+                screenshot_uri: '/icons/alternate-art.png',
+            },
+        ]);
+        fixture.detectChanges();
+
+        expect(component.visibleGridItems()[0]['stream_icon']).toBe(
+            '/icons/alternate-art.png'
+        );
+    });
+
     it('emits channelActivated when a card is clicked', () => {
         const activated = jest.fn();
         fixture.componentRef.setInput('channels', buildChannels(3));
